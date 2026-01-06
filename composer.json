@@ -1,0 +1,13 @@
+{
+  "name": "maryana/coffee-api",
+  "description": "REST API em PHP puro para controle de consumo de café",
+  "type": "project",
+  "require": {
+    "firebase/php-jwt": "^6.10"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}
