@@ -98,6 +98,69 @@ JWT_ALG=HS256
   ```
 - O segredo do JWT é carregado da variável de ambiente `JWT_SECRET`.
 
+## Regras de Requisição
+
+- Endpoints com body esperam `Content-Type: application/json`.
+- JSON inválido retorna erro `400`.
+- Payloads com tipo incorreto ou campos obrigatórios ausentes retornam erro `400`.
+- Requisições com body, quando enviadas sem `application/json`, retornam erro `415`.
+- O parâmetro `page` deve ser inteiro positivo.
+- O parâmetro `per_page` deve ser inteiro positivo.
+- O parâmetro `days` deve ser inteiro positivo.
+- O parâmetro `date` deve estar no formato `YYYY-MM-DD`.
+- Endpoints protegidos validam ownership quando o recurso pertence a um usuário específico.
+
+### Exemplos de Headers
+
+```http
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+### Exemplos de Erro
+
+JSON inválido:
+
+```json
+{
+  "error": "Invalid JSON body."
+}
+```
+
+Content-Type inválido:
+
+```json
+{
+  "error": "Content-Type must be application/json."
+}
+```
+
+Token ausente ou inválido:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+Tentativa de acessar recurso de outro usuário:
+
+```json
+{
+  "error": "Forbidden"
+}
+```
+
+## Códigos de Erro
+
+- `400 Bad Request` para JSON inválido, body inválido, query params inválidos e campos obrigatórios ausentes.
+- `401 Unauthorized` para token ausente ou inválido.
+- `403 Forbidden` para acesso a recurso que não pertence ao usuário autenticado.
+- `404 Not Found` para rotas inexistentes ou recursos não encontrados.
+- `409 Conflict` para criação de recurso já existente, como usuário com e-mail duplicado.
+- `415 Unsupported Media Type` para body enviado sem `Content-Type: application/json`.
+- `500 Internal Server Error` para falhas internas de infraestrutura ou configuração.
+
 ## Observações Importantes
 - O projeto não utiliza frameworks, apenas a biblioteca JWT via Composer.
 - Todas as respostas e entradas são em JSON.
