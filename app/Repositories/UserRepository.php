@@ -90,6 +90,23 @@ class UserRepository
 		}
 	}
 
+	public function incrementDrinkCounter($iduser, int $drink): bool
+	{
+		try {
+			$stmt = $this->db->prepare('UPDATE users SET drink_counter = drink_counter + :drink WHERE id = :id');
+			$stmt->execute([
+				'drink' => $drink,
+				'id' => $iduser
+			]);
+
+			return $stmt->rowCount() > 0;
+		} catch (\Exception $e) {
+			throw $e;
+		} catch (\Throwable $t) {
+			throw new \Exception('Unexpected error in incrementDrinkCounter.', 500);
+		}
+	}
+
 	public function delete($iduser)
 	{
 		try {
