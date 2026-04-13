@@ -20,6 +20,47 @@ class Request
         return $_GET[$name] ?? $default;
     }
 
+    public function getPositiveIntQueryParam(string $name, ?int $default = null, ?string $invalidMessage = null): int
+    {
+        $value = $this->getQueryParam($name);
+        if ($value === null || $value === '') {
+            if ($default !== null) {
+                return $default;
+            }
+
+            throw new ValidationException($invalidMessage ?? sprintf('Query param "%s" is required.', $name));
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_INT) === false || (int) $value < 1) {
+            throw new ValidationException($invalidMessage ?? sprintf('Query param "%s" must be a positive integer.', $name));
+        }
+
+        return (int) $value;
+    }
+
+    public function getDateQueryParam(string $name, ?string $default = null, ?string $requiredMessage = null, ?string $invalidMessage = null): string
+    {
+        $value = $this->getQueryParam($name);
+        if ($value === null || trim((string) $value) === '') {
+            if ($default !== null) {
+                return $default;
+            }
+
+            throw new ValidationException($requiredMessage ?? sprintf('Query param "%s" is required.', $name));
+        }
+
+        $date = \DateTimeImmutable::createFromFormat('Y-m-d', (string) $value);
+        $errors = \DateTimeImmutable::getLastErrors();
+        $hasParsingErrors = is_array($errors)
+            && ($errors['warning_count'] > 0 || $errors['error_count'] > 0);
+
+        if ($date === false || $hasParsingErrors || $date->format('Y-m-d') !== $value) {
+            throw new ValidationException($invalidMessage ?? sprintf('Query param "%s" must be a valid date in Y-m-d format.', $name));
+        }
+
+        return $value;
+    }
+
     public function getMethod()
     {
         return $_SERVER['REQUEST_METHOD'];

@@ -1,7 +1,7 @@
 <?php
+
 namespace App\Controllers;
 
-use App\Exceptions\ValidationException;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\RankingService;
@@ -17,10 +17,7 @@ class RankingController
 
     public function lastDays(Request $request)
     {
-        $days = (int)$request->getQueryParam('days', 7);
-        if ($days <= 0) {
-            throw new ValidationException('Invalid days.');
-        }
+        $days = $request->getPositiveIntQueryParam('days', 7, 'Invalid days.');
 
         $result = $this->rankingService->rankingLastDays($days);
 
@@ -29,10 +26,7 @@ class RankingController
 
     public function byDay(Request $request)
     {
-        $date = $request->getQueryParam('date');
-        if (!$date) {
-            throw new ValidationException('Date is required.');
-        }
+        $date = $request->getDateQueryParam('date', null, 'Date is required.', 'Invalid date.');
 
         $result = $this->rankingService->rankingByDay($date);
 

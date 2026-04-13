@@ -67,16 +67,8 @@ class UserController
 
     public function list(Request $request)
     {
-        $page = (int) $request->getQueryParam('page', 1);
-        $perPage = (int) $request->getQueryParam('per_page', 10);
-
-        if ($page < 1) {
-            $page = 1;
-        }
-
-        if ($perPage < 1) {
-            $perPage = 10;
-        }
+        $page = $request->getPositiveIntQueryParam('page', 1, 'Page must be a positive integer.');
+        $perPage = $request->getPositiveIntQueryParam('per_page', 10, 'Per page must be a positive integer.');
 
         $result = $this->userService->getAllUsersPaginated($page, $perPage);
         $users = array_map(function ($user) {
