@@ -1,15 +1,14 @@
 <?php
 namespace App\Controllers;
 
-use App\Validators\Validator;
-
 use App\Core\Request;
 use App\Core\Response;
+use App\Exceptions\ValidationException;
 use App\Services\AuthService;
+use App\Validators\Validator;
 
 class AuthController
 {
-
     private $authService;
 
     public function __construct()
@@ -17,22 +16,20 @@ class AuthController
         $this->authService = new AuthService();
     }
 
-	public function login(Request $request)
-	{
-		$data = $request->getBody();
+    public function login(Request $request)
+    {
+        $data = $request->getBody();
 
-		if (!Validator::required($data, ['email', 'password'])) {
-			return Response::json(['error' => 'Missing required fields.'], 400);
-		}
-		if (!Validator::email($data['email'])) {
-			return Response::json(['error' => 'Invalid email.'], 400);
-		}
-		try {
-			$result = $this->authService->authenticate($data['email'], $data['password']);
-			return Response::json($result);
-		} catch (\Exception $e) {
-			$code = $e->getCode() ?: 401;
-			return Response::json(['error' => $e->getMessage()], $code);
-		}
-	}
+        if (!Validator::required($data, ['email', 'password'])) {
+            throw new ValidationException('Missing required fields.');
+        }
+
+        if (!Validator::email($data['email'])) {
+            throw new ValidationException('Invalid email.');
+        }
+
+        $result = $this->authService->authenticate($data['email'], $data['password']);
+
+        return Response::json($result);
+    }
 }

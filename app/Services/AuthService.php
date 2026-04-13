@@ -1,37 +1,37 @@
 <?php
 namespace App\Services;
 
+use App\Exceptions\UnauthorizedException;
 use App\Repositories\UserRepository;
 use App\Utils\TokenUtil;
 
 class AuthService
 {
-	private $userRepository;
+    private $userRepository;
 
-	public function __construct()
-	{
-		$this->userRepository = new UserRepository();
-	}
+    public function __construct()
+    {
+        $this->userRepository = new UserRepository();
+    }
 
-	public function authenticate($email, $password)
-	{
-		$user = $this->userRepository->findByEmail($email);
-		if (!$user) {
-			throw new \Exception('User not found.', 401);
-		}
-		if (!password_verify($password, $user->password)) {
-			throw new \Exception('Invalid password.', 401);
-		}
-		$token = TokenUtil::generateToken([
-			'sub' => (int)$user->iduser,
-			'exp' => time() + 60 * 60 * 24 
-		]);
-		return [
-			'token' => $token,
-			'iduser' => (int)$user->iduser,
-			'email' => $user->email,
-			'name' => $user->name,
-			'drinkCounter' => (int)$user->drinkCounter
-		];
-	}
+    public function authenticate($email, $password)
+    {
+        $user = $this->userRepository->findByEmail($email);
+        if (!$user || !password_verify($password, $user->password)) {
+            throw new UnauthorizedException('Invalid credentials.');
+        }
+
+        $token = TokenUtil::generateToken([
+            'sub' => (int) $user->iduser,
+            'exp' => time() + 60 * 60 * 24,
+        ]);
+
+        return [
+            'token' => $token,
+            'iduser' => (int) $user->iduser,
+            'email' => $user->email,
+            'name' => $user->name,
+            'drinkCounter' => (int) $user->drinkCounter,
+        ];
+    }
 }

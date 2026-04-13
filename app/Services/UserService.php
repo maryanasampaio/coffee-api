@@ -1,6 +1,8 @@
 <?php
 namespace App\Services;
 
+use App\Exceptions\ConflictException;
+use App\Exceptions\NotFoundException;
 use App\Repositories\UserRepository;
 use App\Models\User;
 
@@ -16,7 +18,7 @@ class UserService
     public function createUser($name, $email, $password)
     {
         if ($this->userRepository->findByEmail($email)) {
-            throw new \Exception('User already exists.');
+            throw new ConflictException('User already exists.');
         }
         $user = new User([
             'name' => $name,
@@ -41,11 +43,17 @@ class UserService
     {
         $user = $this->userRepository->findById($iduser);
         if (!$user) {
-            throw new \Exception('User not found.');
+            throw new NotFoundException('User not found.');
         }
-        if (isset($data['name'])) $user->name = $data['name'];
-        if (isset($data['email'])) $user->email = $data['email'];
-        if (isset($data['password'])) $user->password = password_hash($data['password'], PASSWORD_DEFAULT);
+        if (isset($data['name'])) {
+            $user->name = $data['name'];
+        }
+        if (isset($data['email'])) {
+            $user->email = $data['email'];
+        }
+        if (isset($data['password'])) {
+            $user->password = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
         $this->userRepository->update($user);
         return $user;
     }
@@ -54,7 +62,7 @@ class UserService
     {
         $user = $this->userRepository->findById($iduser);
         if (!$user) {
-            throw new \Exception('User not found.', 404);
+            throw new NotFoundException('User not found.');
         }
         return $this->userRepository->delete($iduser);
     }

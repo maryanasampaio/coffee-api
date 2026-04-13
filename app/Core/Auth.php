@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Exceptions\UnauthorizedException;
 use App\Utils\TokenUtil;
 
 class Auth
@@ -30,8 +31,6 @@ class Auth
 
     private static function unauthorized(): void
     {
-        http_response_code(401);
-        echo json_encode(['error' => 'Unauthorized']);
-        exit;
+        throw new UnauthorizedException();
     }
 }
