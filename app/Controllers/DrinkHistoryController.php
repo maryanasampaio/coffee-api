@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers;
 
-use App\Exceptions\ForbiddenException;
+use App\Core\Request;
 use App\Repositories\DrinkLogRepository;
 use App\Core\Response;
 
@@ -14,13 +14,12 @@ class DrinkHistoryController
         $this->drinkLogRepository = new DrinkLogRepository();
     }
 
-    public function history(int $iduser)
+    public function history(int $iduser, Request $request)
     {
-        $tokenUserId = $_REQUEST['auth_user_id'] ?? null;
-        if ((int)$tokenUserId !== (int)$iduser) {
-            throw new ForbiddenException();
-        }
+        $request->ensureAuthenticatedUserOwns($iduser);
+
         $history = $this->drinkLogRepository->getHistoryByUser($iduser);
+
         return Response::json($history);
     }
 }

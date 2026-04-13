@@ -7,7 +7,7 @@ use App\Utils\TokenUtil;
 
 class Auth
 {
-    public static function check(): void
+    public static function check(): int
     {
         $headers = getallheaders();
         $auth = $headers['Authorization'] ?? '';
@@ -23,10 +23,14 @@ class Auth
         }
 
         if (is_object($payload) && isset($payload->sub)) {
-            $_REQUEST['auth_user_id'] = (int)$payload->sub;
-        } elseif (is_array($payload) && isset($payload['sub'])) {
-            $_REQUEST['auth_user_id'] = (int)$payload['sub'];
+            return (int) $payload->sub;
         }
+
+        if (is_array($payload) && isset($payload['sub'])) {
+            return (int) $payload['sub'];
+        }
+
+        self::unauthorized();
     }
 
     private static function unauthorized(): void

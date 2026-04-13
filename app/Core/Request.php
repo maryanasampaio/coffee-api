@@ -2,13 +2,16 @@
 
 namespace App\Core;
 
+use App\Exceptions\ForbiddenException;
 use App\Exceptions\UnsupportedMediaTypeException;
+use App\Exceptions\UnauthorizedException;
 use App\Exceptions\ValidationException;
 
 class Request
 {
     private ?string $rawBody = null;
     private ?array $decodedBody = null;
+    private ?int $authenticatedUserId = null;
 
     public function getQueryParams()
     {
@@ -64,6 +67,32 @@ class Request
     public function getMethod()
     {
         return $_SERVER['REQUEST_METHOD'];
+    }
+
+    public function setAuthenticatedUserId(int $authenticatedUserId): void
+    {
+        $this->authenticatedUserId = $authenticatedUserId;
+    }
+
+    public function getAuthenticatedUserId(): ?int
+    {
+        return $this->authenticatedUserId;
+    }
+
+    public function requireAuthenticatedUserId(): int
+    {
+        if ($this->authenticatedUserId === null) {
+            throw new UnauthorizedException();
+        }
+
+        return $this->authenticatedUserId;
+    }
+
+    public function ensureAuthenticatedUserOwns(int $userId): void
+    {
+        if ($this->requireAuthenticatedUserId() !== $userId) {
+            throw new ForbiddenException();
+        }
     }
 
     public function getUri()

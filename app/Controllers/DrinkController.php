@@ -1,7 +1,6 @@
 <?php
 namespace App\Controllers;
 
-use App\Exceptions\ForbiddenException;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\DrinkService;
@@ -17,10 +16,7 @@ class DrinkController
 
     public function increment(int $iduser, Request $request)
     {
-        $tokenUserId = $_REQUEST['auth_user_id'] ?? null;
-        if ((int) $tokenUserId !== (int) $iduser) {
-            throw new ForbiddenException();
-        }
+        $request->ensureAuthenticatedUserOwns($iduser);
 
         $drink = $request->getPositiveIntBodyField('drink', null, 'Invalid value for drink.');
 

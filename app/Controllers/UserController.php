@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Core\Request;
 use App\Core\Response;
-use App\Exceptions\ForbiddenException;
 use App\Exceptions\HttpException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\ValidationException;
@@ -87,7 +86,7 @@ class UserController
 
     public function update(Request $request, $iduser)
     {
-        $this->ensureAuthenticatedUserOwns((int) $iduser);
+        $request->ensureAuthenticatedUserOwns((int) $iduser);
 
         $data = $request->getBody();
         if (isset($data['email']) && !Validator::email($data['email'])) {
@@ -104,9 +103,9 @@ class UserController
         ]);
     }
 
-    public function delete($iduser)
+    public function delete(Request $request, $iduser)
     {
-        $this->ensureAuthenticatedUserOwns((int) $iduser);
+        $request->ensureAuthenticatedUserOwns((int) $iduser);
 
         $ok = $this->userService->deleteUser($iduser);
         if (!$ok) {
@@ -119,6 +118,7 @@ class UserController
     public function drink($params, Request $request)
     {
         $iduser = $params['iduser'] ?? null;
+        $request->ensureAuthenticatedUserOwns((int) $iduser);
         $drink = $request->getPositiveIntBodyField('drink', 1, 'Invalid value for drink.');
         $drinkService = new DrinkService();
         $user = $drinkService->incrementDrink($iduser, $drink);
@@ -129,14 +129,5 @@ class UserController
             'name' => $user->name,
             'drinkCounter' => $user->drinkCounter,
         ]);
-    }
-
-    private function ensureAuthenticatedUserOwns(int $iduser): void
-    {
-        $tokenUserId = $_REQUEST['auth_user_id'] ?? null;
-
-        if ((int) $tokenUserId !== $iduser) {
-            throw new ForbiddenException();
-        }
     }
 }

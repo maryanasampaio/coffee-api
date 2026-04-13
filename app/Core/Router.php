@@ -63,20 +63,22 @@ class Router
 
     private function dispatchMatchedRoute(array $route, array $matches)
     {
+        $request = new Request();
+
         if ($route['auth']) {
-            Auth::check();
+            $request->setAuthenticatedUserId(Auth::check());
         }
 
         [$controller, $method] = explode('@', $route['handler']);
         $controllerInstance = new $controller();
         $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
         $reflection = new \ReflectionMethod($controllerInstance, $method);
-        $args = $this->buildArguments($reflection, $params);
+        $args = $this->buildArguments($reflection, $params, $request);
 
         return call_user_func_array([$controllerInstance, $method], $args);
     }
 
-    private function buildArguments(\ReflectionMethod $reflection, array $params): array
+    private function buildArguments(\ReflectionMethod $reflection, array $params, Request $request): array
     {
         $args = [];
 
@@ -85,7 +87,7 @@ class Router
             $typeName = $type ? $type->getName() : null;
 
             if ($typeName === Request::class) {
-                $args[] = new Request();
+                $args[] = $request;
                 continue;
             }
 
