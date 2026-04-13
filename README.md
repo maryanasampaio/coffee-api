@@ -26,6 +26,7 @@ coffee-api/
 │   ├── Validators/       # Validações de dados
 │   ├── Utils/            # Utilitários (TokenUtil, etc)
 ├── config/
+│   ├── auth.php          # Configuração de autenticação JWT
 │   └── database.php      # Configuração de conexão com o banco
 ├── database/
 │   └── schema.sql        # Script SQL para criação das tabelas
@@ -44,6 +45,16 @@ coffee-api/
 - **Dependências:**
   - Instale o Composer (https://getcomposer.org/)
   - Execute `composer require firebase/php-jwt` na raiz do projeto para instalar a dependência JWT.
+- **Variáveis de ambiente:**
+  - Crie um arquivo `.env` na raiz do projeto com base no `.env.example`.
+  - Defina ao menos `JWT_SECRET` com um valor forte e privado.
+
+Exemplo de `.env`:
+
+```env
+JWT_SECRET=troque-este-segredo-por-um-valor-forte
+JWT_ALG=HS256
+```
 
 ## Configuração do Banco de Dados
 
@@ -81,6 +92,7 @@ coffee-api/
   ```
   Authorization: Bearer <token>
   ```
+- O segredo do JWT é carregado da variável de ambiente `JWT_SECRET`.
 
 ## Observações Importantes
 - O projeto não utiliza frameworks, apenas a biblioteca JWT via Composer.
