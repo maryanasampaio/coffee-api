@@ -2,7 +2,9 @@
 namespace App\Repositories;
 
 use App\Core\Database;
+use App\Exceptions\DatabaseException;
 use PDO;
+use Throwable;
 
 class RankingRepository
 {
@@ -15,7 +17,8 @@ class RankingRepository
 
     public function byDay(string $date): array
     {
-        $stmt = $this->db->prepare("
+        try {
+            $stmt = $this->db->prepare("
             SELECT u.name, SUM(dl.quantity) AS quantity
             FROM drink_logs dl
             JOIN users u ON u.id = dl.user_id
@@ -23,7 +26,10 @@ class RankingRepository
             GROUP BY u.id, u.name
             ORDER BY quantity DESC
         ");
-        $stmt->execute(['date' => $date]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->execute(['date' => $date]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $exception) {
+            throw new DatabaseException('Failed to fetch ranking by day.');
+        }
     }
 }

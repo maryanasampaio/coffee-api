@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Exceptions\DatabaseException;
 use PDO;
 use PDOException;
 
@@ -12,7 +13,7 @@ class Database
     public static function getInstance(): PDO
     {
         if (self::$instance === null) {
-            $config = require __DIR__ . '/../../config/database.php';
+            $config = require_once __DIR__ . '/../../config/database.php';
 
             try {
                 self::$instance = new PDO(
@@ -25,9 +26,7 @@ class Database
                     ]
                 );
             } catch (PDOException $e) {
-                http_response_code(500);
-                echo json_encode(['error' => 'Database connection failed']);
-                exit;
+                throw new DatabaseException('Database connection failed.');
             }
         }
 
