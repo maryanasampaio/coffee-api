@@ -24,11 +24,7 @@ class UserController
 
     public function create(Request $request)
     {
-        $data = $request->getBody();
-
-        if (!Validator::required($data, ['name', 'email', 'password'])) {
-            throw new ValidationException('Missing required fields.');
-        }
+        $data = $request->requireBodyFields(['name', 'email', 'password'], 'Missing required fields.');
 
         if (!Validator::email($data['email'])) {
             throw new ValidationException('Invalid email.');
@@ -123,8 +119,7 @@ class UserController
     public function drink($params, Request $request)
     {
         $iduser = $params['iduser'] ?? null;
-        $body = $request->getBody();
-        $drink = isset($body['drink']) ? (int) $body['drink'] : 1;
+        $drink = $request->getPositiveIntBodyField('drink', 1, 'Invalid value for drink.');
         $drinkService = new DrinkService();
         $user = $drinkService->incrementDrink($iduser, $drink);
 

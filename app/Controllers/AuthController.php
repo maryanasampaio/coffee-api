@@ -18,11 +18,7 @@ class AuthController
 
     public function login(Request $request)
     {
-        $data = $request->getBody();
-
-        if (!Validator::required($data, ['email', 'password'])) {
-            throw new ValidationException('Missing required fields.');
-        }
+        $data = $request->requireBodyFields(['email', 'password'], 'Missing required fields.');
 
         if (!Validator::email($data['email'])) {
             throw new ValidationException('Invalid email.');

@@ -101,6 +101,42 @@ class Request
         return $this->decodedBody;
     }
 
+    public function requireBodyFields(array $fields, ?string $message = null): array
+    {
+        $data = $this->getBody();
+
+        foreach ($fields as $field) {
+            if (!array_key_exists($field, $data) || $data[$field] === null) {
+                throw new ValidationException($message ?? sprintf('Field "%s" is required.', $field));
+            }
+
+            if (is_string($data[$field]) && trim($data[$field]) === '') {
+                throw new ValidationException($message ?? sprintf('Field "%s" is required.', $field));
+            }
+        }
+
+        return $data;
+    }
+
+    public function getPositiveIntBodyField(string $name, ?int $default = null, ?string $invalidMessage = null): int
+    {
+        $data = $this->getBody();
+
+        if (!array_key_exists($name, $data) || $data[$name] === null || $data[$name] === '') {
+            if ($default !== null) {
+                return $default;
+            }
+
+            throw new ValidationException($invalidMessage ?? sprintf('Field "%s" must be a positive integer.', $name));
+        }
+
+        if (filter_var($data[$name], FILTER_VALIDATE_INT) === false || (int) $data[$name] < 1) {
+            throw new ValidationException($invalidMessage ?? sprintf('Field "%s" must be a positive integer.', $name));
+        }
+
+        return (int) $data[$name];
+    }
+
     public function getHeader($name)
     {
         $normalizedName = strtolower($name);
