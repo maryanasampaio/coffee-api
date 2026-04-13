@@ -166,6 +166,33 @@ class Request
         return (int) $data[$name];
     }
 
+    public function requireEmailBodyField(string $name, ?string $requiredMessage = null, ?string $invalidMessage = null): string
+    {
+        $data = $this->requireBodyFields([$name], $requiredMessage);
+        $email = (string) $data[$name];
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new ValidationException($invalidMessage ?? sprintf('Field "%s" must be a valid email.', $name));
+        }
+
+        return $email;
+    }
+
+    public function getOptionalEmailBodyField(string $name, ?string $invalidMessage = null): ?string
+    {
+        $data = $this->getBody();
+        if (!array_key_exists($name, $data) || $data[$name] === null || $data[$name] === '') {
+            return null;
+        }
+
+        $email = (string) $data[$name];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new ValidationException($invalidMessage ?? sprintf('Field "%s" must be a valid email.', $name));
+        }
+
+        return $email;
+    }
+
     public function getHeader($name)
     {
         $normalizedName = strtolower($name);

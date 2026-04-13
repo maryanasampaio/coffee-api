@@ -6,11 +6,9 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Exceptions\HttpException;
 use App\Exceptions\NotFoundException;
-use App\Exceptions\ValidationException;
 use App\Services\DrinkService;
 use App\Services\UserService;
 use App\Utils\TokenUtil;
-use App\Validators\Validator;
 
 class UserController
 {
@@ -24,10 +22,7 @@ class UserController
     public function create(Request $request)
     {
         $data = $request->requireBodyFields(['name', 'email', 'password'], 'Missing required fields.');
-
-        if (!Validator::email($data['email'])) {
-            throw new ValidationException('Invalid email.');
-        }
+        $data['email'] = $request->requireEmailBodyField('email', 'Missing required fields.', 'Invalid email.');
 
         $user = $this->userService->createUser($data['name'], $data['email'], $data['password']);
         $token = TokenUtil::generateToken([
@@ -89,8 +84,10 @@ class UserController
         $request->ensureAuthenticatedUserOwns((int) $iduser);
 
         $data = $request->getBody();
-        if (isset($data['email']) && !Validator::email($data['email'])) {
-            throw new ValidationException('Invalid email.');
+
+        $email = $request->getOptionalEmailBodyField('email', 'Invalid email.');
+        if ($email !== null) {
+            $data['email'] = $email;
         }
 
         $user = $this->userService->updateUser($iduser, $data);
