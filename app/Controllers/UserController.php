@@ -85,6 +85,8 @@ class UserController
 
 	public function update(Request $request, $iduser)
 	{
+		$this->ensureAuthenticatedUserOwns((int)$iduser);
+
 		$data = $request->getBody();
 		try {
 			if (isset($data['email']) && !Validator::email($data['email'])) {
@@ -104,6 +106,8 @@ class UserController
 
 	public function delete($iduser)
 	{
+		$this->ensureAuthenticatedUserOwns((int)$iduser);
+
 		try {
 			$ok = $this->userService->deleteUser($iduser);
 			if ($ok) {
@@ -134,6 +138,15 @@ class UserController
 			return Response::json([
 				'error' => $e->getMessage()
 			], $e->getCode() ?: 400);
+		}
+	}
+
+	private function ensureAuthenticatedUserOwns(int $iduser): void
+	{
+		$tokenUserId = $_REQUEST['auth_user_id'] ?? null;
+
+		if ((int)$tokenUserId !== $iduser) {
+			Response::json(['error' => 'Forbidden'], 403);
 		}
 	}
 }
