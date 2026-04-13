@@ -29,7 +29,9 @@ coffee-api/
 │   ├── auth.php          # Configuração de autenticação JWT
 │   └── database.php      # Configuração de conexão com o banco
 ├── database/
-│   └── schema.sql        # Script SQL para criação das tabelas
+│   ├── queries/          # Consultas SQL de referência
+│   ├── schema.sql        # Script SQL para criação das tabelas
+│   └── seeds/            # Dados iniciais para desenvolvimento
 ├── public/
 │   └── index.php         # Front controller
 ├── routes/
@@ -59,7 +61,9 @@ JWT_ALG=HS256
 ## Configuração do Banco de Dados
 
 1. Crie o banco e as tabelas manualmente utilizando o script em `database/schema.sql`.
-2. Configure o acesso ao banco em `config/database.php`:
+2. Se quiser popular o ambiente local, use os arquivos de `database/seeds/`.
+3. As consultas SQL de apoio e referência ficam em `database/queries/`.
+4. Configure o acesso ao banco em `config/database.php`:
    ```php
    return [
        'dsn' => 'mysql:host=localhost;dbname=coffee_api',
@@ -99,7 +103,7 @@ JWT_ALG=HS256
 - Todas as respostas e entradas são em JSON.
 - O padrão de arquitetura é MVC, com separação clara entre controllers, services, repositories e models.
 - O registro de consumo de café (`/drink`) só pode ser feito pelo próprio usuário autenticado (ownership garantida).
-- O banco deve ser criado manualmente usando o script SQL fornecido.
+- O schema do banco está isolado em `database/schema.sql`; consultas utilitárias ficam separadas em `database/queries/`.
 - Recomenda-se o uso do XAMPP para ambiente local e DBVisualizer (dbvear) para gerenciar o banco.
 
 ---
